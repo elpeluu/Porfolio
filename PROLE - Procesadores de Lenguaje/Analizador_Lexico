@@ -1,0 +1,118 @@
+
+%option caseless
+
+coments "--".*
+espacio ([[:space:]]*{coments}?[[:space:]]*)
+
+%x ARGS VARS BODY SENT CON CONTART	
+
+   int Nargs = 0;				
+   int Nvar = 0;				
+
+   int nTablas = 0;                             
+   int nTablasMayor = 0;		
+
+   char tablas[10][20];				
+   char tablas_mas_grande[10][20];		
+   int indice_tablas = 0;			
+
+   char sentencia_mas_grande[2048];		
+   char sentencia_actual[2048];			
+
+   char consulta_mas_grande[2048];		
+   char consulta_actual[2048];			
+   
+%%
+
+<INITIAL,ARGS,VARS,BODY,SENT,CON,CONTART>{coments}			{}
+
+--"CREATE"[[:space:]]+("OR"[[:space:]]"REPLACE"[[:space:]])?"PROCEDURE"			BEGIN(ARGS);
+
+CREATE{espacio}(OR{espacio}REPLACE{espacio})?PROCEDURE{espacio}                 BEGIN(ARGS);
+
+
+
+<ARGS>"("			{Nargs++;}
+<ARGS>","			{Nargs++;}
+<ARGS>"IS"|"AS"			{BEGIN(VARS);}
+
+<VARS>[a-zA-Z][0-9]*";"		{Nvar++;}
+<VARS>"BEGIN"			{BEGIN(BODY);}
+
+<BODY>"UPDATE"|"DELETE"		{
+				 sentencia_actual[0] = '\0';	
+				 strcat(sentencia_actual, yytext);	
+				 BEGIN(SENT);
+				}
+
+<BODY>"SELECT"			{
+				 consulta_actual[0] = '\0';		
+				 strcat(consulta_actual, yytext);	
+				 BEGIN(CON);							
+				}
+
+<BODY>"END"			{}
+
+<SENT>";"			{	
+				 strcat(sentencia_actual, yytext);
+				 if(strlen(sentencia_actual) > strlen(sentencia_mas_grande)){						
+			            strcpy(sentencia_mas_grande, sentencia_actual);
+				    sentencia_actual[0] = '\0';
+				 }
+				 sentencia_actual[0] = '\0';
+				 BEGIN(BODY);
+				}
+<SENT>.                         {strcat(sentencia_actual, yytext);}
+
+<CON>"FROM"			{
+				 strcat(consulta_actual, yytext);
+				 nTablas = 1;
+				 BEGIN(CONTART);
+				}
+<CON>.                          {strcat(consulta_actual, yytext);}
+
+<CONTART>,		{
+				 strcat(consulta_actual, yytext);
+				 nTablas++;
+				}
+<CONTART>[a-z_][a-z0-9_]*	{
+				 strcpy(tablas[indice_tablas], yytext);     
+				 indice_tablas++;
+				}	
+			
+<CONTART>;		{
+				 strcat(consulta_actual, yytext);
+				 if(nTablas > nTablasMayor){
+				   strcpy(consulta_mas_grande, consulta_actual);
+				   nTablasMayor = nTablas;
+				   
+				   for(int i = 0; i < indice_tablas; i++){
+				      strcpy(tablas_mas_grande[i], tablas[i]);
+				   } 
+				 }
+
+				 consulta_actual[0] = '\0';
+				 nTablas = 0;
+				 indice_tablas = 0;
+				 for(int i = 0; i < 10; i++){
+				    tablas[i][0] = '\0';
+				 }
+				 BEGIN(BODY);
+				}
+<CONTART>.		{strcat(consulta_actual, yytext);}
+
+%%
+
+int main(){
+   yylex();
+   printf("\nResultados del Analisis Lexico:\n");
+   printf("El procedimiento tiene %d argumentos \n", Nargs);
+   printf("El número de variables locales es %d \n", Nvar);
+   printf("La sentencia de actualizacion/borrado más larga es:\n %s \n", sentencia_mas_grande);
+   printf("Las tablas utilizadas en la consulta con mas tablas son %d y son: ", nTablasMayor);
+   for(int i = 0; i < nTablasMayor; i++){
+      printf("%s, ", tablas_mas_grande[i]);
+   }
+   printf("\n");
+   return 0;
+}

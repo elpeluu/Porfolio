@@ -1,0 +1,79 @@
+// EJERCICIO 6 - Programa que lista las PRIMERAS y ULTIMAS palabras de cada linea
+
+options{}
+
+PARSER_BEGIN(ej6)
+
+public class ej6{
+	
+	static String[] primerasPalabras = new String[100];
+	static String[] ultimasPalabras = new String[100];
+	static int nLinea = 0;
+	static boolean esPrimeraPalabra = true;
+	static String ultimaPalabra = "";
+
+	public static void main(String args[]){
+		if(args.length != 1){
+			System.out.println("Error al abrir el archivo. Recuerda indicar el nombre del archivo a leer con su extensión.");
+			return; 
+		}
+	
+		try{
+	
+			int c; 
+			java.io.FileReader fr = new java.io.FileReader(args[0]);
+			
+			System.out.println("CONTENIDO ORIGINAL DEL ARCHIVO:");
+			while((c = fr.read()) != -1){
+				System.out.print((char) c);
+			}
+			fr.close();
+			
+			java.io.FileReader fr2 = new java.io.FileReader(args[0]);
+			ej6TokenManager tkmngr = new ej6TokenManager (new SimpleCharStream(fr2));
+			Token tk; 
+			
+			while((tk = tkmngr.getNextToken()).kind != EOF);
+
+			System.out.println("\n###################################");
+			System.out.println("EJERCICIO 6 - RESULTADOS DEL ANÁLISIS");
+			System.out.println("###################################");
+			System.out.println("PRIMERAS Y ULTIMAS PALABRAS DE CADA LINEA");	
+			for (int i = 0; i <= nLinea; i++){
+				System.out.println("Linea "+ (i+1) +"- "+ primerasPalabras[i]+ " - " + ultimasPalabras[i]);
+			}
+			
+	
+		}catch(TokenMgrError x){
+			System.out.println("Error de token.");
+			throw x;
+		}catch(java.io.IOException e){
+			System.out.println("Error al abrir el archivo: " + e.getMessage());
+		}	
+		
+	}
+}
+
+PARSER_END(ej6)
+
+<DEFAULT>TOKEN: 
+{
+	<PALABRA: (["A"-"Z", "a"-"z"])*>				{if(ej6.esPrimeraPalabra){
+														ej6.primerasPalabras[ej6.nLinea] = image.toString();
+														ej6.esPrimeraPalabra = false;
+													 } ej6.ultimaPalabra = image.toString();
+													}
+}
+
+<*>TOKEN:
+{
+	<EOL:"\n">							{
+												 ej6.ultimasPalabras[ej6.nLinea] = ej6.ultimaPalabra; 
+												 ej6.nLinea++;
+												 ej6.ultimaPalabra = "";
+												 ej6.esPrimeraPalabra = true;
+												}
+
+|	<RESTO: ~[]>		
+|	<EOF>									{ej6.ultimasPalabras[ej6.nLinea] = ej6.ultimaPalabra;}						
+}

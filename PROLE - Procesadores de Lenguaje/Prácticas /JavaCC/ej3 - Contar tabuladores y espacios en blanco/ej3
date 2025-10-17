@@ -1,0 +1,56 @@
+// Ejercicio 3 - Programa que cuenta el número de espacios y tabuladores
+
+options{}
+
+PARSER_BEGIN(ej3)
+
+public class ej3{
+
+	static int nEspacios = 0; 
+	static int nTabuladores = 0;
+
+	public static void main(String args[]){
+		if(args.length != 1){
+			System.out.println("Recuerda indicar el nombre del archivo a leer (con su extensión)");
+			return; 
+		}
+
+		try{
+			java.io.FileReader fr = new java.io.FileReader(args[0]);
+			ej3TokenManager tkmngr = new ej3TokenManager(new SimpleCharStream(fr));
+			Token tk;
+
+			while((tk = tkmngr.getNextToken()).kind != EOF)
+				if(tk.kind == EOL) System.out.println();
+				else System.out.print(tk.image);
+
+		}catch(java.io.IOException e){
+			System.out.println("Error al abrir el archivo: " + e.getMessage());
+		}catch(TokenMgrError x){
+			System.out.println("Error de token. SALIENDO");
+			throw x;
+		}
+
+		System.out.println("#######################################");
+		System.out.println("EJERCICIO 3 - RESULTADOS DEL ANÁLISIS");
+		System.out.println("#######################################");
+
+		System.out.println("El numero de espacios que hay en el fichero es: " + nEspacios);
+		System.out.println("El número de tabuladores que hay en el fichero es: " + nTabuladores);
+
+	}
+}
+PARSER_END(ej3)
+
+TOKEN: 
+{
+	<SP: " ">			{ej3.nEspacios++;}
+|	<TAB: "\t">			{ej3.nTabuladores++;}
+
+|	<COM_LINEA: "//"(~[])*>
+|	<COM_MULTI: "/*"(~[])*"*/">
+
+| 	<EOL: "\n">
+
+|	<RESTO: ~[]>
+}

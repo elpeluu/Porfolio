@@ -1,0 +1,67 @@
+// EJERCICIO 4 - Programa que transforma todas las letras mayúsculas en minúsculas 
+
+options{}
+
+PARSER_BEGIN(ej4)
+
+public class ej4{
+
+	public static void main(String args[]){
+		if(args.length != 1){
+			System.out.println("Error al introducir el archivo a leer. Recuerda que debes indicarlo con la extensión.");
+			return; 
+		}
+
+		try{
+			// Primera lectura e impesión del archivo original
+
+			java.io.FileReader fr = new java.io.FileReader(args[0]);
+			int c; 
+			
+			System.out.println("CONTENIDO ORIGINAL DEL ARCHIVO:");
+			while((c = fr.read()) != -1){
+				System.out.print((char) c);
+			}
+			fr.close();
+
+			System.out.println("\n###################################");
+			System.out.println("EJERCICIO 4 - RESULTADOS DEL ANÁLISIS");
+			System.out.println("###################################");
+
+			// Segunda lectura e impresión del archivo modificado
+			try{
+    				java.io.FileReader fr2 = new java.io.FileReader(args[0]);
+    				ej4TokenManager tkmngr = new ej4TokenManager(new SimpleCharStream(fr2));
+    				Token tk; 
+
+    				System.out.println("CONTENIDO MODIFICADO DEL ARCHIVO:");
+    				while((tk = tkmngr.getNextToken()).kind != EOF);
+
+			}catch(java.io.IOException e){
+    				System.out.println("Error al abrir el archivo: " + e.getMessage());
+			}
+
+		}catch(java.io.IOException e){
+			System.out.println("Error al abrir el archivo: " + e.getMessage());
+		}catch(TokenMgrError x){
+			System.out.println("Error de token.");
+			throw x;
+		}
+		
+		
+	}
+}
+
+PARSER_END(ej4)
+
+TOKEN: 
+{
+	<LETRAS: ["A"-"Z"]>				{System.out.print(image.toString().toLowerCase());}
+
+| 	<COM_LIN: "//"(~[])*>				{System.out.print(image);}
+|	<COM_MUL: "/*"(~[])*"*/">		{System.out.print(image);}
+
+|	<EOL: "\n">							{System.out.print(image);}
+|	<RESTO: ~[]>						{System.out.print(image);}
+
+}

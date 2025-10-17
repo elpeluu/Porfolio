@@ -1,0 +1,54 @@
+// Programa que LEE UN ARCHIVO y cuenta el número de líneas que tienen menos de 30 caracteres y las que tienen menos de 30 letras
+
+options{}
+
+PARSER_BEGIN(ej2b)
+public class ej2b{
+	static int nCaracter = 0; 
+	static int nLetras = 0; 
+	static int nLineasCaracter = 0;
+	static int nLineasLetras = 0;
+
+	public static void main(String args[]){
+		if(args.length != 1){
+			System.out.println("Recuerda agregar el nombre archivo a leer como argumento (con su extensión)");
+			return; 
+		}
+
+		try{
+			java.io.FileReader fr = new java.io.FileReader(args[0]);
+			ej2bTokenManager tkmngr = new ej2bTokenManager (new SimpleCharStream(fr)); 		
+			Token tk; 
+	
+			while((tk = tkmngr.getNextToken()).kind != EOF)
+				if(tk.kind == EOL) System.out.println();
+				else System.out.print(tk.image);
+			
+		}catch(java.io.IOException e){
+			System.out.println("Error al leer el archivo: " + e.getMessage());
+		}
+
+		System.out.println();
+		System.out.println("#######################################");
+		System.out.println("RESULTADOS DEL ANÁLISIS");
+		System.out.println("#######################################");
+		System.out.println("El numero de lineas con menos de 30 caracteres es " + nLineasCaracter);
+		System.out.println("El numero de lineas con menos de 30 letras es " + nLineasLetras);
+	}
+}
+
+PARSER_END(ej2b)
+
+TOKEN: 
+{
+<LETRA: ["a"-"z", "A" - "Z"]>			{ej2b.nLetras++;
+										 ej2b.nCaracter++;}
+
+|<EOL: "\n">							{if(ej2b.nCaracter < 30) ej2b.nLineasCaracter++;
+										 if(ej2b.nLetras < 30) ej2b.nLineasLetras++;
+										 ej2b.nCaracter++;
+										 ej2b.nLetras++;}
+
+|<CARACTER: ~[]>						{ej2b.nCaracter++;}
+
+}

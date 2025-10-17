@@ -1,0 +1,86 @@
+// EJERCICIO 10 - Programa que elimine las filas que tienen mas de 3 tabuladores salvo que los tenga seguidos, en ese caso se sustituyen por un espacio
+
+options{}
+
+PARSER_BEGIN(ej10)
+
+public class ej10{
+
+	static int nTabs = 0;
+	static char[][] linea = new char[30][500];
+	static int indiceLinea = 0; 
+	static int nLinea = 0;
+
+	public static void main(String args[]){
+		if(args.length != 1){
+			System.out.println("Error al indicar el archivo. Recuerda que debes agregar el nombre del archivo con su extensión.");
+			return; 
+		}	
+		
+		try{
+			// Mostrar el contenido original del archivo
+			System.out.println("CONTENIDO ORIGINAL DEL ARCHIVO: ");
+			java.io.FileReader fr = new java.io.FileReader(args[0]);
+			int c; 
+			while((c = fr.read()) != -1){
+				System.out.print((char) c);
+			}
+			fr.close();
+			
+			System.out.println("\n#########################");
+			System.out.println("EJERCICIO 10 - RESULTADOS DEL ANÁLISIS");
+			System.out.println("#########################");
+			System.out.println("CONTENIDO RESULTANTE");
+			
+			// Ejecución de los tokens e impresión del resultado
+				try{
+					java.io.FileReader fr2 = new java.io.FileReader(args[0]);
+					ej10TokenManager tkmngr = new ej10TokenManager(new SimpleCharStream(fr2));
+					Token tk;
+				
+					while((tk = tkmngr.getNextToken()).kind != EOF);
+
+				}catch(TokenMgrError x){
+					System.out.println("Error de token.");
+					throw x;
+				}
+
+		}catch(java.io.IOException e){
+			System.out.println("Error al abrir el archivo: " + e.getMessage());
+		}
+	}
+}
+
+PARSER_END(ej10)
+
+TOKEN:
+{
+
+	<TABS:"\t""\t""\t"("\t")*>	{ej10.linea[ej10.nLinea][ej10.indiceLinea] = ' ';
+								 ej10.indiceLinea++;}	
+
+|	<TAB:"\t">				{ej10.nTabs++;
+							 ej10.linea[ej10.nLinea][ej10.indiceLinea] = image.charAt(0);
+							 ej10.indiceLinea++;}	
+
+
+|	<EOL: "\n"> 		{
+  						  ej10.linea[ej10.nLinea][ej10.indiceLinea] = '\n';
+
+   					 		if (ej10.nTabs < 3) {
+       						 		for (int j = 0; j <= ej10.indiceLinea; j++) {
+         			 				System.out.print(ej10.linea[ej10.nLinea][j]);
+     								}
+   					 		}
+
+   				 		// Reiniciar contadores para la siguiente línea
+    						ej10.indiceLinea = 0;
+  						ej10.nTabs = 0;
+    						ej10.nLinea++;
+						}
+
+
+|	<RESTO: ~[]>			{ej10.linea[ej10.nLinea][ej10.indiceLinea] = image.charAt(0);
+							 ej10.indiceLinea++;}
+}
+

@@ -1,0 +1,66 @@
+// EJERCICIO 7 - Agregar los números de línea a las líneas de un fichero
+
+options{}
+
+PARSER_BEGIN(ej7)
+
+public class ej7{
+	
+	static int nLinea = 1;
+	static boolean esLineaNueva = true; 
+	
+	public static void main(String args[]){	
+		if(args.length != 1){
+			System.out.println("Error al indicar el archivo a leer. Recuerde que debe proporcionar el nombre incluyendo su extensión.");
+			return;
+		}
+
+		try{
+			//Primera lectura e impresión del contenido original del archivo
+			java.io.FileReader fr = new java.io.FileReader(args[0]);
+			int c;
+			
+			while((c = fr.read()) != -1){
+				System.out.print((char) c);
+			}		
+
+			//Muestra del contenido modificado - RESULTADOS
+			System.out.println("\n#########################");
+			System.out.println("RESULTADOS DEL ANÁLISIS");
+			System.out.println("#########################");
+
+			//segunda lectura e impresión de contenido
+			try{
+				java.io.FileReader fr2 = new java.io.FileReader(args[0]);
+				ej7TokenManager tkmngr = new ej7TokenManager(new SimpleCharStream(fr2));
+				Token tk;
+				
+				while((tk = tkmngr.getNextToken()).kind != EOF);
+
+			}catch(TokenMgrError x){
+			System.out.println("Error de token.");
+			throw x;
+			}
+
+		}catch(java.io.IOException e){
+			System.out.println("Error al leer el archivo: " + e.getMessage());
+		}
+	}
+}
+
+PARSER_END(ej7)
+
+TOKEN:
+{
+	<CARACTER: ~["\n"]> 	{if(ej7.esLineaNueva){
+							 System.out.print(ej7.nLinea + "- " + image.toString());
+							 ej7.esLineaNueva = false;
+							 }else System.out.print(image.toString());
+							}
+
+|	<EOL: "\n">				{ej7.nLinea++;
+							 ej7.esLineaNueva = true;
+							 System.out.print(image.toString());}
+}
+
+

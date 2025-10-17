@@ -1,0 +1,3 @@
+# Práctica 1 - FLEX
+
+Esta práctica consiste en un programa FLEX de un analizador léxico de sentencias PL/SQL donde se analizan 2 sentencias, recogiendo información relacionada tal como numero de parámetros, sentencia mas larga, UPDATE/DELETE, numero de variables con las que trabaja cada una de las sentencias...

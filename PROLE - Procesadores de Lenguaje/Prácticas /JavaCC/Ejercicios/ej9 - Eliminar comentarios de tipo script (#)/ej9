@@ -1,0 +1,63 @@
+// EJERCICIO 9 - Programa Elimina comentarios scripts (desde # hasta el fin de línea)
+
+options{}
+
+PARSER_BEGIN(ej9)
+
+public class ej9{
+
+	public static void main(String args[]){
+		if(args.length != 1){
+			System.out.println("Error al indicar el archivo. Recuerda que debes agregar el nombre del archivo con su extensión.");
+			return; 
+		}	
+		
+		try{
+			// Mostrar el contenido original del archivo
+			System.out.println("CONTENIDO ORIGINAL DEL ARCHIVO: ");
+			java.io.FileReader fr = new java.io.FileReader(args[0]);
+			int c; 
+			while((c = fr.read()) != -1){
+				System.out.print((char) c);
+			}
+			fr.close();
+			
+			System.out.println("\n#########################");
+			System.out.println("EJERCICIO 9 - RESULTADOS DEL ANÁLISIS");
+			System.out.println("#########################");
+			System.out.println("CONTENIDO RESULTANTE");
+			
+			// Ejecución de los tokens e impresión del resultado
+				try{
+					java.io.FileReader fr2 = new java.io.FileReader(args[0]);
+					ej9TokenManager tkmngr = new ej9TokenManager(new SimpleCharStream(fr2));
+					Token tk;
+				
+					while((tk = tkmngr.getNextToken()).kind != EOF);
+
+				}catch(TokenMgrError x){
+					System.out.println("Error de token.");
+					throw x;
+				}
+
+		}catch(java.io.IOException e){
+			System.out.println("Error al abrir el archivo: " + e.getMessage());
+		}
+	}
+}
+
+PARSER_END(ej9)
+
+<DEFAULT>TOKEN:
+{
+	<INICIO_COM: "#">		{SwitchTo(COM);}	
+|	<RESTO: ~[]>			{System.out.print(image.toString());}
+}
+
+<COM>TOKEN: 
+{
+	<EOL_C:"\n">			{System.out.print(image.toString());
+							 SwitchTo(DEFAULT);}
+|	<CARACTER: ~[]>
+}
+

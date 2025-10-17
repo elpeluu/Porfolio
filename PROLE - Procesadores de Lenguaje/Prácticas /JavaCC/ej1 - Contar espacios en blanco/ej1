@@ -1,0 +1,38 @@
+//EJ1 - Programa que cuente el numero de espacios en blanco
+
+options{}
+
+PARSER_BEGIN(ej1)
+
+public class ej1{
+
+	static int nEspacios = 0; 	
+
+	public static void main(String args[]){
+		ej1TokenManager tkmngr = new ej1TokenManager(new SimpleCharStream(System.in));
+		Token tk; 
+		
+		System.out.println("Introduce una expresión:");
+		System.out.flush();
+
+		try{
+			while((tk = tkmngr.getNextToken()).kind != EOF)	// EOF es hacer CTRL+Z en el cmd al escribir lo que sea
+				if(tk.kind == EOL) System.out.println("<<lf>>");
+				else System.out.println("<<"+tk.image+">>");
+		}catch(TokenMgrError x){
+			System.out.println("Saliendo");
+			throw x;
+		}
+
+		System.out.println("El numero de espacios en blanco de la expresion son: " + nEspacios);
+	}	
+}
+
+PARSER_END(ej1)
+
+TOKEN: 
+{
+	<EOL:  "\n">				{System.out.print("<lf>"); System.out.flush();}
+|	<ESPACIOS: " ">				{ej1.nEspacios++;}
+|	<RESTO: ~[]>				
+}

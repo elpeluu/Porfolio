@@ -1,0 +1,48 @@
+// EJ2 - Programa que cuenta las líneas que tienen menos de 30 caracteres y 30 letras de CADENAS INTRODUCIDAS POR TECLADO
+
+options{}
+
+PARSER_BEGIN(ej2)
+
+public class ej2{
+	static int nCaracter = 0;
+	static int nLetras = 0; 
+	static int nLineasCaracter = 0;
+	static int nLineasLetras = 0; 
+
+	public static void main (String args[]){
+		ej2TokenManager tkmngr = new ej2TokenManager(new SimpleCharStream(System.in));
+		Token tk; 
+
+		System.out.println("Introduce una expresión: ");
+		System.out.flush();
+
+		try{
+			while((tk = tkmngr.getNextToken()).kind != EOF)
+				if(tk.kind == EOL) System.out.println("<<lf>>");
+				else System.out.println("<<"+tk.image+">>");
+		}catch(TokenMgrError x){
+			System.out.println("Saliendo");
+			throw x;
+		}
+
+		System.out.println("El número de lineas con menos de 30 caracteres es: " + nLineasCaracter);
+		System.out.println("El número de lineas con menos de 30 letras es: " + nLineasLetras);
+	
+	}
+
+}
+
+PARSER_END(ej2)
+
+TOKEN:
+{
+	<LETRA: ["a"-"z", "A" - "Z"]>				{ej2.nLetras++;
+												 ej2.nCaracter++;}
+|	<EOL: "\n">									{if(ej2.nCaracter < 30) ej2.nLineasCaracter++;
+												 if(ej2.nLetras < 30) ej2.nLineasLetras++;
+												 ej2.nCaracter = 0;
+												 ej2.nLetras = 0;
+												}
+|	<CARACTER: ~[]>							{ej2.nCaracter++;}
+}

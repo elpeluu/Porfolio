@@ -1,0 +1,60 @@
+// EJERCICIO 8 - Programa que cuenta los números en formato punto flotante
+
+options{}
+
+PARSER_BEGIN(ej8)
+
+public class ej8{
+
+	static int nDecimales = 0;
+
+	public static void main(String args[]){
+		if(args.length != 1){
+			System.out.println("Error al indicar el archivo. Recuerda que debes agregar el nombre del archivo con su extensión.");
+			return; 
+		}	
+		
+		try{
+			// Mostrar el contenido original del archivo
+			System.out.println("CONTENIDO ORIGINAL DEL ARCHIVO: ");
+			java.io.FileReader fr = new java.io.FileReader(args[0]);
+			int c; 
+			while((c = fr.read()) != -1){
+				System.out.print((char) c);
+			}
+			fr.close();
+
+			// Ejecución de los tokens
+			try{
+				java.io.FileReader fr2 = new java.io.FileReader(args[0]);
+				ej8TokenManager tkmngr = new ej8TokenManager(new SimpleCharStream(fr2));
+				Token tk;
+				
+				while((tk = tkmngr.getNextToken()).kind != EOF);
+
+			}catch(TokenMgrError x){
+				System.out.println("Error de token.");
+				throw x;
+			}
+			
+			System.out.println("\n#########################");
+			System.out.println("EJERCICIO 8 - RESULTADOS DEL ANÁLISIS");
+			System.out.println("#########################");
+			System.out.println("El número de decimales que contiene este archivo es: " + nDecimales);
+			
+		
+		}catch(java.io.IOException e){
+			System.out.println("Error al abrir el archivo: " + e.getMessage());
+		}
+	}
+}
+
+PARSER_END(ej8)
+
+TOKEN:
+{
+	<DECIMAL: ("-")?(["0"-"9"])+"."(["0"-"9"])+>		{ej8.nDecimales++;}
+
+|	<RESTO: ~[]>
+}
+
